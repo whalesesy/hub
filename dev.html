@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ICT Ticketing System</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    :root{
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --accent-1: #4e73df;
+      --accent-2: #00b894;
+      --muted: #6c757d;
+      --danger: #e74a3b;
+      --warning: #f6c23e;
+      --success: #1cc88a;
+      --info: #36b9cc;
+      --shadow: 0 8px 30px rgba(29,33,39,0.06);
+      --radius: 12px;
+      --glass: rgba(255,255,255,0.7);
+      --transition: all 0.3s ease;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent-1: #5b8def;
+      --accent-2: #2dd4bf;
+      --muted: #94a3b8;
+      --danger: #ff6b6b;
+      --warning: #fbbf24;
+      --success: #10b981;
+      --info: #0ea5e9;
+      --shadow: 0 8px 30px rgba(2,6,23,0.7);
+      --glass: rgba(255,255,255,0.03);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
+    }
+    body { 
+      margin:0; 
+      background:linear-gradient(135deg,var(--bg), #ffffff); 
+      min-height:100vh; 
+      color:var(--muted); 
+      transition: var(--transition);
+    }
+    header { 
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between; 
+      gap:12px; 
+      padding:18px 24px; 
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2)); 
+      color:white; 
+      box-shadow:var(--shadow); 
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 { 
+      margin:0; 
+      font-size:18px; 
+      letter-spacing:0.2px; 
+      font-weight:600; 
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-controls { 
+      display:flex; 
+      gap:10px; 
+      align-items:center; 
+    }
+    .btn { 
+      padding:8px 12px; 
+      border-radius:10px; 
+      border:none; 
+      cursor:pointer; 
+      font-weight:600; 
+      box-shadow:none; 
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-ghost { 
+      background:transparent; 
+      color:white; 
+      opacity:0.95; 
+      border:1px solid rgba(255,255,255,0.08); 
+    }
+    .btn-primary { 
+      background:linear-gradient(90deg,var(--accent-2),var(--accent-1)); 
+      color:white; 
+    }
+    .btn-success { 
+      background: var(--success); 
+      color:white; 
+    }
+    .btn-warning { 
+      background: var(--warning); 
+      color:white; 
+    }
+    .btn-danger { 
+      background: var(--danger); 
+      color:white; 
+    }
+
+    .container { 
+      padding:22px; 
+      max-width:1200px; 
+      margin:16px auto; 
+    }
+    .grid { 
+      display:grid; 
+      grid-template-columns: 260px 1fr; 
+      gap:18px; 
+      align-items:start; 
+    }
+
+    .sidebar { 
+      background:var(--card); 
+      border-radius:var(--radius); 
+      padding:14px; 
+      box-shadow:var(--shadow); 
+      min-height:380px; 
+      position: sticky;
+      top: 90px;
+      transition: var(--transition);
+    }
+    .nav-item { 
+      padding:10px; 
+      border-radius:10px; 
+      color:var(--muted); 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+      cursor:pointer; 
+      transition: var(--transition);
+    }
+    .nav-item.active, .nav-item:hover { 
+      background:linear-gradient(90deg, rgba(78,115,223,0.08), rgba(0,184,148,0.06)); 
+      color:var(--accent-1); 
+      font-weight:600; 
+    }
+
+    .main { 
+      display:flex; 
+      flex-direction:column; 
+      gap:18px; 
+    }
+    .card { 
+      background:var(--card); 
+      border-radius:var(--radius); 
+      padding:16px; 
+      box-shadow:var(--shadow); 
+      transition: var(--transition);
+    }
+    .row { 
+      display:flex; 
+      gap:18px; 
+      align-items:center; 
+    }
+    .stat { 
+      flex:1; 
+      padding:18px; 
+      border-radius:12px; 
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), var(--glass));
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+    }
+    .stat h3 { 
+      margin:0; 
+      color:var(--accent-1); 
+      font-size: 24px;
+    }
+    .stat p { 
+      margin:6px 0 0 0; 
+      color:var(--muted); 
+      font-size:13px; 
+    }
+
+    label { 
+      display:block; 
+      font-size:13px; 
+      margin-bottom:6px; 
+      color:var(--muted); 
+      font-weight:600; 
+    }
+    input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="datetime-local"], select, textarea {
+      width:100%; 
+      padding:10px 12px; 
+      border-radius:10px; 
+      border:1px solid rgba(100,116,139,0.08); 
+      background:transparent;
+      color:var(--muted);
+      transition: var(--transition);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+    }
+    .form-row { 
+      display:grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap:12px; 
+      align-items:end; 
+    }
+    .small { 
+      font-size:13px; 
+      color:var(--muted); 
+    }
+
+    table { 
+      width:100%; 
+      border-collapse:collapse; 
+      margin-top:12px; 
+    }
+    th, td { 
+      text-align:left; 
+      padding:10px 12px; 
+      border-bottom:1px solid rgba(0,0,0,0.04); 
+      color:var(--muted); 
+    }
+    th { 
+      color:var(--accent-1); 
+      font-weight:700; 
+      font-size:13px; 
+    }
+    .action { 
+      display:flex; 
+      gap:8px; 
+      justify-content:flex-end; 
+    }
+
+    .login-wrap { 
+      display:flex; 
+      min-height: calc(100vh - 72px); 
+      align-items:center; 
+      justify-content:center; 
+      padding:20px; 
+    }
+    .login-card { 
+      width:480px; 
+      border-radius:14px; 
+      padding:20px; 
+      background:var(--card); 
+      box-shadow:var(--shadow); 
+      transition: var(--transition);
+    }
+    .login-card h2 { 
+      margin:0 0 8px 0; 
+      color:var(--accent-1); 
+    }
+
+    .muted { 
+      color:var(--muted); 
+      font-size:13px; 
+    }
+    .badge { 
+      padding:6px 10px; 
+      border-radius:999px; 
+      background:rgba(0,0,0,0.04); 
+      font-weight:700; 
+      color:var(--muted); 
+    }
+
+    .notif { 
+      position:relative; 
+    }
+    .notif-count { 
+      position:absolute; 
+      top:-6px; 
+      right:-8px; 
+      background:var(--danger); 
+      color:white; 
+      font-size:11px; 
+      padding:4px 6px; 
+      border-radius:999px; 
+    }
+
+    /* Dropdown styles */
+    .dropdown { 
+      position: relative; 
+      display: inline-block; 
+    }
+    .dropdown-content { 
+      display: none; 
+      position: absolute; 
+      background-color: var(--card); 
+      min-width: 160px; 
+      box-shadow: var(--shadow); 
+      z-index: 1; 
+      border-radius: var(--radius); 
+      overflow: hidden; 
+    }
+    .dropdown-content a { 
+      color: var(--muted); 
+      padding: 12px 16px; 
+      text-decoration: none; 
+      display: block; 
+    }
+    .dropdown-content a:hover { 
+      background-color: rgba(78,115,223,0.08); 
+      color: var(--accent-1); 
+    }
+    .dropdown:hover .dropdown-content { 
+      display: block; 
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .toast {
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: white;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 350px;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success {
+      background: var(--success);
+    }
+    
+    .toast.error {
+      background: var(--danger);
+    }
+    
+    .toast.warning {
+      background: var(--warning);
+    }
+    
+    .toast.info {
+      background: var(--info);
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Loading spinner */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Status indicators */
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    
+    .status-pending { background-color: var(--warning); }
+    .status-approved { background-color: var(--success); }
+    .status-issued { background-color: var(--info); }
+    .status-rejected { background-color: var(--danger); }
+    
+    /* Responsive improvements */
+    @media (max-width:900px){ 
+      .grid { 
+        grid-template-columns: 1fr; 
+      } 
+      .sidebar { 
+        order:2; 
+        position: static;
+      } 
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .stat {
+        min-width: 140px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 12px;
+      }
+      header {
+        padding: 12px 16px;
+      }
+      .top-controls {
+        gap: 6px;
+      }
+      .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+    }
+    
+    /* Print styles */
+    @media print {
+      header, .sidebar, .top-controls, .btn {
+        display: none !important;
+      }
+      .container {
+        max-width: 100%;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fas fa-ticket-alt"></i> ICT Ticketing System</h1>
+    <div class="top-controls">
+      <div class="small muted" id="user-welcome">Not signed in</div>
+      <div class="notif" style="margin-right:6px;">
+        <button class="btn btn-ghost" id="btn-notifications" title="Notifications"><i class="fas fa-bell"></i></button>
+        <div id="notif-count" class="notif-count" style="display:none">0</div>
+        <div id="notif-dropdown" style="display:none; position:absolute; right:0; margin-top:8px; background:var(--card); box-shadow:var(--shadow); border-radius:8px; padding:8px; min-width:260px; z-index:50"></div>
+      </div>
+      <button class="btn btn-ghost" id="toggle-theme" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
+      <button class="btn btn-primary" id="logout-btn" style="display:none"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </header>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="container" id="app">
+    <!-- LOGIN / SIGNUP -->
+    <div id="page-login" class="login-wrap">
+      <div class="login-card">
+        <h2>Welcome Back</h2>
+        <p class="muted">Sign in to your account or <a href="#" id="link-show-signup">create a new one</a>.</p>
+
+        <div id="login-form">
+          <label><i class="fas fa-user"></i> Username</label>
+          <input id="login-username" type="text" placeholder="Enter your username" />
+
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input id="login-email" type="email" placeholder="name@company.co.ke" />
+
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input id="login-password" type="password" placeholder="Enter your password" />
+
+          <label><i class="fas fa-user-tag"></i> Role</label>
+          <select id="login-role">
+            <option value="user">User</option>
+            <option value="approver">Approver</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-primary" id="btn-login"><i class="fas fa-sign-in-alt"></i> Sign in</button>
+            <button class="btn" id="btn-demo-login"><i class="fas fa-magic"></i> Demo Login</button>
+          </div>
+          <p class="muted" style="text-align: center; margin-top: 12px;"><a href="#" id="forgot-password-link">Forgot your password?</a></p>
+        </div>
+
+        <div id="signup-panel" style="display:none; margin-top:16px;">
+          <h3>Create Account</h3>
+          <label>Full Name</label>
+          <input id="signup-name" type="text" placeholder="Your full name" />
+          
+          <label>Username</label>
+          <input id="signup-username" type="text" placeholder="Choose username" />
+          
+          <label>Email</label>
+          <input id="signup-email" type="email" placeholder="name@company.co.ke" />
+          
+          <label>Password</label>
+          <input id="signup-password" type="password" placeholder="Create password" />
+          
+          <label>Role</label>
+          <select id="signup-role">
+            <option value="user">User</option>
+            <option value="approver">Approver</option>
+            <option value="admin">Admin</option>
+          </select>
+          
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-primary" id="btn-signup"><i class="fas fa-user-plus"></i> Sign Up</button>
+            <button class="btn" id="btn-cancel-signup"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN INTERFACE (hidden until login) -->
+    <div id="main-ui" style="display:none;">
+      <div class="grid">
+        <!-- sidebar -->
+        <aside class="sidebar">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <div id="avatar" style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">JD</div>
+            <div>
+              <div id="sidebar-name" style="font-weight:700;color:var(--accent-1)">John Doe</div>
+              <div class="muted" id="sidebar-role">Requester</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:8px;">
+            <input id="global-search" type="text" placeholder="Search across pages..." oninput="globalSearch(this.value)" style="padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);width:100%"/>
+          </div>
+
+          <div id="nav-dashboard" class="nav-item active" onclick="navigate('dashboard')"><i class="fas fa-chart-bar"></i> Dashboard</div>
+          <div id="nav-request" class="nav-item" onclick="navigate('request')"><i class="fas fa-plus-circle"></i> New Request</div>
+          <div id="nav-my-requests" class="nav-item" onclick="navigate('myrequests')"><i class="fas fa-folder"></i> My Requests</div>
+
+          <div id="nav-approvals" class="nav-item" onclick="navigate('approvals')" style="display:none"><i class="fas fa-check-circle"></i> Approvals</div>
+          
+          <!-- Inventory dropdown -->
+          <div class="dropdown" id="nav-inventory-dropdown" style="display:none">
+            <div class="nav-item"><i class="fas fa-boxes"></i> Inventory</div>
+            <div class="dropdown-content">
+              <a href="#" onclick="navigate('inventory')"><i class="fas fa-eye"></i> View Inventory</a>
+              <a href="#" onclick="navigate('stockin')"><i class="fas fa-arrow-down"></i> Stock In</a>
+              <a href="#" onclick="navigate('stockout')"><i class="fas fa-arrow-up"></i> Stock Out</a>
+            </div>
+          </div>
+          
+          <div id="nav-reports" class="nav-item" onclick="navigate('reports')" style="display:none"><i class="fas fa-chart-pie"></i> Reports</div>
+          <div id="nav-feedback" class="nav-item" onclick="navigate('feedback')"><i class="fas fa-comment"></i> Feedback</div>
+
+          <div class="muted" style="margin-top:12px; font-size:13px;">Theme</div>
+          <div style="margin-top:8px;"><button id="toggle-theme-sidebar" class="btn" style="padding:6px 8px;"><i class="fas fa-palette"></i> Toggle theme</button></div>
+        </aside>
+
+        <!-- main content -->
+        <main class="main">
+          <!-- Dashboard -->
+          <section id="page-dashboard" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <div>
+                <h3 style="margin:0;color:var(--accent-1)"><i class="fas fa-tachometer-alt"></i> Overview</h3>
+                <div class="muted" style="margin-top:6px">Quick stats & charts</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <div class="badge" id="total-requests-badge">0 requests</div>
+                <div class="badge" id="total-devices-badge">0 devices</div>
+                <button class="btn" onclick="refreshDashboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:16px; flex-wrap: wrap;">
+              <div class="stat">
+                <h3 id="stat-pending">0</h3>
+                <p><span class="status-indicator status-pending"></span> Pending requests</p>
+              </div>
+              <div class="stat">
+                <h3 id="stat-approved">0</h3>
+                <p><span class="status-indicator status-approved"></span> Approved</p>
+              </div>
+              <div class="stat">
+                <h3 id="stat-issued">0</h3>
+                <p><span class="status-indicator status-issued"></span> Issued</p>
+              </div>
+              <div class="stat">
+                <h3 id="stat-available">0</h3>
+                <p><i class="fas fa-box"></i> Available devices</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:18px; margin-top:18px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:320px;" class="card">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-chart-pie"></i> Requests by status</h4>
+                <canvas id="chart-status" width="400" height="260"></canvas>
+              </div>
+
+              <div style="flex:1; min-width:320px;" class="card">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-chart-line"></i> Requests over time</h4>
+                <canvas id="chart-time" width="400" height="260"></canvas>
+              </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div style="margin-top: 18px;" class="card">
+              <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-history"></i> Recent Activity</h4>
+              <div id="recent-activity" style="max-height: 200px; overflow-y: auto;">
+                <!-- Recent activity will be populated here -->
+              </div>
+            </div>
+          </section>
+
+          <!-- New Request -->
+          <section id="page-request" class="card" style="display:none;">
+            <h3 style="color:var(--accent-1)"><i class="fas fa-plus-circle"></i> Create a new device request</h3>
+            <p class="muted">Request devices — users can view only their own requests.</p>
+            <div style="margin-top:12px;">
+              <label><i class="fas fa-laptop"></i> Device Type</label>
+              <select id="req-device-type">
+                <option value="">Select device</option>
+                <option value="Laptop">Laptop</option>
+                <option value="Phone">Phone</option>
+                <option value="Tablet">Tablet</option>
+                <option value="Projector">Projector</option>
+                <option value="Monitor">Monitor</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <div class="form-row" style="margin-top:8px;">
+                <div>
+                  <label><i class="fas fa-cubes"></i> Quantity</label>
+                  <input id="req-quantity" type="number" min="1" max="10" value="1" />
+                </div>
+                <div>
+                  <label><i class="fas fa-clock"></i> Duration</label>
+                  <select id="req-duration">
+                    <option>1 day</option><option>1 week</option><option>2 weeks</option><option>1 month</option><option>3 months</option><option>Permanent</option>
+                  </select>
+                </div>
+              </div>
+
+              <label style="margin-top:8px;"><i class="fas fa-edit"></i> Purpose</label>
+              <textarea id="req-purpose" rows="3" placeholder="Describe purpose..."></textarea>
+
+              <div style="display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="submitRequest()"><i class="fas fa-paper-plane"></i> Submit request</button>
+                <button class="btn" onclick="clearRequestForm()"><i class="fas fa-undo"></i> Reset</button>
+                <div style="margin-left:12px;">
+                  <label><i class="fas fa-calendar-alt"></i> Needed by (date/time)</label>
+                  <input id="req-needed-by" type="datetime-local" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- My Requests -->
+          <section id="page-myrequests" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="color:var(--accent-1)"><i class="fas fa-folder"></i> My Requests</h3>
+                <div class="muted">Requests submitted by you.</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="search-myrequests" placeholder="Search my requests..." oninput="renderMyRequests()" />
+                <button class="btn" onclick="exportMyRequests()"><i class="fas fa-download"></i> Export</button>
+              </div>
+            </div>
+            <table id="table-myrequests">
+              <thead><tr><th>ID</th><th>Device</th><th>Qty</th><th>Purpose</th><th>Needed</th><th>Submitted</th><th>Status</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div id="myrequests-empty" style="text-align: center; padding: 20px; display: none;">
+              <i class="fas fa-inbox" style="font-size: 48px; color: var(--muted); margin-bottom: 10px;"></i>
+              <p>No requests found. <a href="#" onclick="navigate('request')">Create your first request</a>.</p>
+            </div>
+          </section>
+
+          <!-- Approvals (approver/admin) -->
+          <section id="page-approvals" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="color:var(--accent-1)"><i class="fas fa-check-circle"></i> Pending Approvals</h3>
+                <div class="muted">Approve or reject requests. Provide a reason when rejecting.</div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input id="search-approvals" placeholder="Search approvals..." oninput="renderApprovals()" />
+                <button class="btn" onclick="bulkApprove()"><i class="fas fa-check-double"></i> Bulk Approve</button>
+              </div>
+            </div>
+            <table id="table-approvals">
+              <thead><tr><th><input type="checkbox" id="select-all-approvals" onchange="toggleSelectAllApprovals(this.checked)"></th><th>ID</th><th>Requester</th><th>Device</th><th>Qty</th><th>Purpose</th><th>Needed</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div id="approvals-empty" style="text-align: center; padding: 20px; display: none;">
+              <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 10px;"></i>
+              <p>No pending approvals. All caught up!</p>
+            </div>
+          </section>
+
+          <!-- Inventory (admin only) -->
+          <section id="page-inventory" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="color:var(--accent-1); margin:0"><i class="fas fa-boxes"></i> Inventory</h3>
+                <div class="muted small" style="margin-top:6px">View and manage devices (admin only).</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-primary" onclick="openAddDeviceModal()"><i class="fas fa-plus"></i> Add device</button>
+                <button class="btn" onclick="exportInventoryCSV()"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn" onclick="printInventory()"><i class="fas fa-print"></i> Print</button>
+              </div>
+            </div>
+
+            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+              <input id="search-inventory" placeholder="Search inventory..." oninput="renderInventoryTable()" />
+            </div>
+
+            <table id="table-inventory" style="margin-top:12px;">
+              <thead><tr><th>Device ID</th><th>Type</th><th>Model</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div id="inventory-empty" style="text-align: center; padding: 20px; display: none;">
+              <i class="fas fa-box-open" style="font-size: 48px; color: var(--muted); margin-bottom: 10px;"></i>
+              <p>No devices in inventory. <a href="#" onclick="openAddDeviceModal()">Add your first device</a>.</p>
+            </div>
+          </section>
+
+          <!-- Stock In (admin only) -->
+          <section id="page-stockin" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="color:var(--accent-1); margin:0"><i class="fas fa-arrow-down"></i> Stock In</h3>
+                <div class="muted small" style="margin-top:6px">Add new stock to inventory (admin only).</div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <div class="form-row">
+                <div>
+                  <label><i class="fas fa-laptop"></i> Device Type</label>
+                  <select id="stockin-device-type">
+                    <option value="">Select device type</option>
+                    <option value="Laptop">Laptop</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Tablet">Tablet</option>
+                    <option value="Projector">Projector</option>
+                    <option value="Monitor">Monitor</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label><i class="fas fa-tag"></i> Model</label>
+                  <input id="stockin-model" type="text" placeholder="e.g. Dell Latitude" />
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top:8px;">
+                <div>
+                  <label><i class="fas fa-cubes"></i> Quantity</label>
+                  <input id="stockin-quantity" type="number" min="1" value="1" />
+                </div>
+                <div>
+                  <label><i class="fas fa-truck"></i> Supplier</label>
+                  <input id="stockin-supplier" type="text" placeholder="Supplier name" />
+                </div>
+              </div>
+
+              <div style="margin-top:8px;">
+                <label><i class="fas fa-sticky-note"></i> Notes</label>
+                <textarea id="stockin-notes" rows="3" placeholder="Additional notes..."></textarea>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:12px;">
+                <button class="btn btn-primary" onclick="processStockIn()"><i class="fas fa-check"></i> Process Stock In</button>
+                <button class="btn" onclick="clearStockInForm()"><i class="fas fa-undo"></i> Clear</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Stock Out (admin only) -->
+          <section id="page-stockout" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="color:var(--accent-1); margin:0"><i class="fas fa-arrow-up"></i> Stock Out</h3>
+                <div class="muted small" style="margin-top:6px">Remove stock from inventory (admin only).</div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <div class="form-row">
+                <div>
+                  <label><i class="fas fa-laptop"></i> Device Type</label>
+                  <select id="stockout-device-type">
+                    <option value="">Select device type</option>
+                    <option value="Laptop">Laptop</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Tablet">Tablet</option>
+                    <option value="Projector">Projector</option>
+                    <option value="Monitor">Monitor</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label><i class="fas fa-tag"></i> Model</label>
+                  <input id="stockout-model" type="text" placeholder="e.g. Dell Latitude" />
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top:8px;">
+                <div>
+                  <label><i class="fas fa-cubes"></i> Quantity</label>
+                  <input id="stockout-quantity" type="number" min="1" value="1" />
+                </div>
+                <div>
+                  <label><i class="fas fa-exclamation-circle"></i> Reason</label>
+                  <select id="stockout-reason">
+                    <option value="Issued">Issued to employee</option>
+                    <option value="Damaged">Damaged/Defective</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Returned">Returned to supplier</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="margin-top:8px;">
+                <label><i class="fas fa-sticky-note"></i> Notes</label>
+                <textarea id="stockout-notes" rows="3" placeholder="Additional notes..."></textarea>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:12px;">
+                <button class="btn btn-primary" onclick="processStockOut()"><i class="fas fa-check"></i> Process Stock Out</button>
+                <button class="btn" onclick="clearStockOutForm()"><i class="fas fa-undo"></i> Clear</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Reports (admin) -->
+          <section id="page-reports" class="card" style="display:none;">
+            <h3 style="color:var(--accent-1)"><i class="fas fa-chart-pie"></i> Reports</h3>
+            <p class="muted">Export system summary for audits.</p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:12px; margin-top:16px;">
+              <div class="card" style="cursor: pointer;" onclick="exportFullReport()">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-file-csv"></i> Full Report</h4>
+                <p class="muted">Complete system data in CSV format</p>
+              </div>
+              <div class="card" style="cursor: pointer;" onclick="exportInventoryCSV()">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-boxes"></i> Inventory Report</h4>
+                <p class="muted">Current inventory status</p>
+              </div>
+              <div class="card" style="cursor: pointer;" onclick="exportRequestsReport()">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-ticket-alt"></i> Requests Report</h4>
+                <p class="muted">All requests with status</p>
+              </div>
+              <div class="card" style="cursor: pointer;" onclick="downloadDashboardPDF()">
+                <h4 style="margin:0 0 8px 0;color:var(--accent-1)"><i class="fas fa-file-pdf"></i> Dashboard PDF</h4>
+                <p class="muted">Dashboard summary in PDF</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Feedback -->
+          <section id="page-feedback" class="card" style="display:none;">
+            <h3 style="color:var(--accent-1)"><i class="fas fa-comment"></i> Feedback</h3>
+            <p class="muted">Send feedback about the system.</p>
+            <label><i class="fas fa-heading"></i> Subject</label>
+            <input id="fb-subject" />
+            <label><i class="fas fa-envelope-open-text"></i> Message</label>
+            <textarea id="fb-message" rows="4"></textarea>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <button class="btn btn-primary" onclick="submitFeedback()"><i class="fas fa-paper-plane"></i> Send</button>
+              <button class="btn" onclick="clearFeedbackForm()"><i class="fas fa-undo"></i> Clear</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal-add-device" style="display:none; position:fixed; inset:0; background: rgba(2,6,23,0.5); align-items:center; justify-content:center; z-index: 1000;">
+    <div style="width:420px; background:var(--card); padding:16px; border-radius:12px; box-shadow:var(--shadow);">
+      <h3 style="margin:0 0 8px 0"><i class="fas fa-plus-circle"></i> Add Device</h3>
+      <label>Type</label><input id="md-type" type="text" placeholder="Laptop / Phone / Projector" />
+      <label>Model</label><input id="md-model" type="text" placeholder="e.g. Dell Latitude" />
+      <label>Status</label>
+      <select id="md-status"><option>Available</option><option>Issued</option><option>Maintenance</option></select>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+        <button class="btn" onclick="closeAddDeviceModal()"><i class="fas fa-times"></i> Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddDevice()"><i class="fas fa-check"></i> Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject modal -->
+  <div id="modal-reject" style="display:none; position:fixed; inset:0; background: rgba(2,6,23,0.5); align-items:center; justify-content:center; z-index: 1000;">
+    <div style="width:520px; background:var(--card); padding:16px; border-radius:12px; box-shadow:var(--shadow);">
+      <h3 style="margin:0 0 8px 0"><i class="fas fa-times-circle"></i> Reject Request</h3>
+      <div class="muted">Provide a reason for rejection (this will be saved with the request).</div>
+      <label>Reason / Comment</label>
+      <textarea id="reject-reason" rows="4"></textarea>
+      <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+        <button class="btn" onclick="closeRejectModal()"><i class="fas fa-times"></i> Cancel</button>
+        <button class="btn btn-primary" onclick="confirmReject()"><i class="fas fa-ban"></i> Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Reset Modal -->
+  <div id="reset-modal" style="display:none; position:fixed; inset:0; background: rgba(2,6,23,0.5); align-items:center; justify-content:center; z-index: 1000;">
+    <div style="width:420px; background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow);">
+      <h3 style="margin:0 0 12px 0; color: var(--accent-1)"><i class="fas fa-key"></i> Reset Password</h3>
+      <p class="muted">Enter your email address and we'll send you a reset link.</p>
+      <label>Email Address</label>
+      <input type="email" id="reset-email" placeholder="your@email.com" style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);" />
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top: 16px;">
+        <button class="btn" onclick="closeResetModal()"><i class="fas fa-times"></i> Cancel</button>
+        <button class="btn btn-primary" onclick="submitPasswordReset()"><i class="fas fa-paper-plane"></i> Send Reset Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize EmailJS
+    (function(){
+      emailjs.init({
+        publicKey: "Tatv-c5qLJfrxzCyo",
+        blockHeadless: true,
+        limitRate: {
+          id: 'app',
+          throttle: 10000,
+        },
+      });
+    })();
+
+    /**************************************************************************
+     * COMPLETE ICT TICKETING SYSTEM
+     * - All-in-one HTML file with integrated PHP backend simulation
+     * - Local storage for data persistence
+     * - EmailJS integration for email functionality
+     * - Complete user management system
+     **************************************************************************/
+
+    // Application State
+    let state = {
+      currentUser: null,
+      charts: {},
+      selectedApprovals: new Set(),
+      pendingRejectId: null,
+      // Demo data initialization
+      users: [
+        { id: 1, username: 'admin', password: 'admin123', name: 'ICT Admin', email: 'admin@company.co.ke', role: 'admin', emailVerified: true },
+        { id: 2, username: 'approver', password: 'approver123', name: 'Jane Approver', email: 'approver@company.co.ke', role: 'approver', emailVerified: true },
+        { id: 3, username: 'user', password: 'user123', name: 'John User', email: 'user@company.co.ke', role: 'user', emailVerified: true }
+      ],
+      inventory: [
+        { id: 'D-1001', type: 'Laptop', model: 'Dell Latitude 5420', status: 'Available' },
+        { id: 'D-1002', type: 'Laptop', model: 'Dell Latitude 5420', status: 'Available' },
+        { id: 'D-1003', type: 'Laptop', model: 'HP EliteBook 840 G8', status: 'Issued' },
+        { id: 'D-1004', type: 'Phone', model: 'Samsung Galaxy S21', status: 'Available' },
+        { id: 'D-1005', type: 'Tablet', model: 'iPad Air 5th Gen', status: 'Maintenance' }
+      ],
+      requests: [
+        { id: 'REQ-1001', device: 'Laptop', quantity: 1, requesterId: 3, requesterName: 'John User', purpose: 'New employee onboarding', duration: 'Permanent', status: 'approved', createdAt: Date.now() - 86400000, neededBy: null, rejectReason: '' },
+        { id: 'REQ-1002', device: 'Phone', quantity: 1, requesterId: 3, requesterName: 'John User', purpose: 'Field work and client meetings', duration: '6 months', status: 'pending', createdAt: Date.now() - 43200000, neededBy: null, rejectReason: '' }
+      ],
+      notifications: [],
+      stockTransactions: [],
+      feedback: []
+    };
+
+    // Initialize data from localStorage
+    function initializeData() {
+      if (localStorage.getItem('ict_users')) {
+        state.users = JSON.parse(localStorage.getItem('ict_users'));
+      }
+      if (localStorage.getItem('ict_inventory')) {
+        state.inventory = JSON.parse(localStorage.getItem('ict_inventory'));
+      }
+      if (localStorage.getItem('ict_requests')) {
+        state.requests = JSON.parse(localStorage.getItem('ict_requests'));
+      }
+      if (localStorage.getItem('ict_notifications')) {
+        state.notifications = JSON.parse(localStorage.getItem('ict_notifications'));
+      }
+    }
+
+    // Save data to localStorage
+    function saveData() {
+      localStorage.setItem('ict_users', JSON.stringify(state.users));
+      localStorage.setItem('ict_inventory', JSON.stringify(state.inventory));
+      localStorage.setItem('ict_requests', JSON.stringify(state.requests));
+      localStorage.setItem('ict_notifications', JSON.stringify(state.notifications));
+    }
+
+    // DOM references
+    const pageLogin = document.getElementById('page-login');
+    const mainUi = document.getElementById('main-ui');
+    const userWelcome = document.getElementById('user-welcome');
+    const logoutBtn = document.getElementById('logout-btn');
+    const avatarEl = document.getElementById('avatar');
+    const sidebarName = document.getElementById('sidebar-name');
+    const sidebarRole = document.getElementById('sidebar-role');
+    const navApprovals = document.getElementById('nav-approvals');
+    const navInventoryDropdown = document.getElementById('nav-inventory-dropdown');
+    const navReports = document.getElementById('nav-reports');
+
+    // Event listeners
+    document.getElementById('btn-login').addEventListener('click', handleLogin);
+    document.getElementById('btn-demo-login').addEventListener('click', demoLogin);
+    logoutBtn.addEventListener('click', doLogout);
+    document.getElementById('toggle-theme').addEventListener('click', toggleTheme);
+    document.getElementById('toggle-theme-sidebar').addEventListener('click', toggleTheme);
+    document.getElementById('btn-notifications').addEventListener('click', toggleNotifDropdown);
+
+    // Signup links
+    document.getElementById('link-show-signup').addEventListener('click', (e)=>{ 
+      e.preventDefault(); 
+      document.getElementById('signup-panel').style.display = 'block'; 
+      document.getElementById('login-form').style.display = 'none';
+    });
+    
+    document.getElementById('btn-cancel-signup').addEventListener('click', ()=>{ 
+      document.getElementById('signup-panel').style.display = 'none'; 
+      document.getElementById('login-form').style.display = 'block';
+    });
+    
+    document.getElementById('btn-signup').addEventListener('click', handleSignup);
+    document.getElementById('forgot-password-link').addEventListener('click', showPasswordResetModal);
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.matches('.notif *')) {
+        document.getElementById('notif-dropdown').style.display = 'none';
+      }
+    });
+
+    // Theme management
+    function toggleTheme(){ 
+      const root = document.documentElement; 
+      const current = root.getAttribute('data-theme') || 'light'; 
+      root.setAttribute('data-theme', current === 'light' ? 'dark' : 'light'); 
+      localStorage.setItem('theme', current === 'light' ? 'dark' : 'light');
+    }
+    
+    // Set initial theme
+    const savedTheme = localStorage.getItem('theme') || 'light'; 
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Navigation system
+    function navigate(page){ 
+      const pages = ['dashboard','request','myrequests','approvals','inventory','stockin','stockout','reports','feedback']; 
+      pages.forEach(p => {
+        const element = document.getElementById('page-' + p);
+        if (element) element.style.display = 'none'; 
+      });
+      
+      const currentPage = document.getElementById('page-' + page);
+      if (currentPage) currentPage.style.display = ''; 
+      
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); 
+      const el = document.getElementById('nav-' + page); 
+      if (el) el.classList.add('active'); 
+      
+      // Special actions for each page
+      if (page === 'dashboard') renderDashboard(); 
+      if (page === 'myrequests') renderMyRequests(); 
+      if (page === 'approvals') renderApprovals(); 
+      if (page === 'inventory') renderInventoryTable(); 
+    }
+
+    // Toast notification system
+    function showToast(message, type = 'info', duration = 5000) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'fas fa-info-circle';
+      if (type === 'success') icon = 'fas fa-check-circle';
+      if (type === 'error') icon = 'fas fa-exclamation-circle';
+      if (type === 'warning') icon = 'fas fa-exclamation-triangle';
+      
+      toast.innerHTML = `
+        <i class="${icon}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: white; cursor: pointer;">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, duration);
+    }
+
+    // Authentication Functions
+    function demoLogin() {
+      const role = document.getElementById('login-role').value;
+      
+      if (role === 'admin') {
+        document.getElementById('login-username').value = 'admin';
+        document.getElementById('login-email').value = 'admin@company.co.ke';
+        document.getElementById('login-password').value = 'admin123';
+      } else if (role === 'approver') {
+        document.getElementById('login-username').value = 'approver';
+        document.getElementById('login-email').value = 'approver@company.co.ke';
+        document.getElementById('login-password').value = 'approver123';
+      } else {
+        document.getElementById('login-username').value = 'user';
+        document.getElementById('login-email').value = 'user@company.co.ke';
+        document.getElementById('login-password').value = 'user123';
+      }
+      
+      showToast('Demo credentials filled. Click Sign in to continue.', 'info', 3000);
+    }
+
+    function handleLogin(){ 
+      const username = document.getElementById('login-username').value.trim(); 
+      const email = document.getElementById('login-email').value.trim().toLowerCase(); 
+      const password = document.getElementById('login-password').value; 
+      const role = document.getElementById('login-role').value; 
+      
+      if (!username || !email || !password) { 
+        showToast('Please fill username, email and password.', 'error');
+        return; 
+      } 
+      
+      const user = state.users.find(u => u.username === username && u.email.toLowerCase() === email && u.password === password && u.role === role); 
+      
+      if (!user) { 
+        showToast('Invalid credentials or role mismatch.', 'error');
+        return; 
+      } 
+      
+      state.currentUser = user; 
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      showToast(`Welcome back, ${user.name}!`, 'success');
+      userSignedIn(); 
+    }
+
+    function userSignedIn(){ 
+      pageLogin.style.display = 'none'; 
+      mainUi.style.display = ''; 
+      logoutBtn.style.display = ''; 
+      userWelcome.textContent = `Signed in as ${state.currentUser.name} (${state.currentUser.role})`; 
+      avatarEl.textContent = state.currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase(); 
+      sidebarName.textContent = state.currentUser.name; 
+      sidebarRole.textContent = state.currentUser.role.charAt(0).toUpperCase() + state.currentUser.role.slice(1); 
+      const isAdmin = state.currentUser.role === 'admin'; 
+      const isApprover = state.currentUser.role === 'approver'; 
+      navInventoryDropdown.style.display = isAdmin ? 'block' : 'none'; 
+      navReports.style.display = isAdmin ? '' : 'none'; 
+      navApprovals.style.display = (isAdmin || isApprover) ? '' : 'none'; 
+      navigate('dashboard'); 
+      updateNotifCount(); 
+      
+      if (isAdmin || isApprover) {
+        const pending = state.requests.filter(r=>r.status==='pending').length;
+        if (pending > 0) {
+          showToast(`You have ${pending} pending request(s) that need action.`, 'info', 6000);
+        }
+      }
+    }
+
+    function doLogout(){ 
+      localStorage.removeItem('currentUser');
+      state.currentUser = null; 
+      mainUi.style.display = 'none'; 
+      pageLogin.style.display = ''; 
+      logoutBtn.style.display = 'none'; 
+      userWelcome.textContent = 'Not signed in'; 
+      if (state.charts.status) state.charts.status.destroy(); 
+      if (state.charts.time) state.charts.time.destroy(); 
+      showToast('You have been logged out.', 'info');
+    }
+
+    function handleSignup(){ 
+      const name = document.getElementById('signup-name').value.trim(); 
+      const username = document.getElementById('signup-username').value.trim(); 
+      const email = document.getElementById('signup-email').value.trim().toLowerCase(); 
+      const password = document.getElementById('signup-password').value; 
+      const role = document.getElementById('signup-role').value; 
+      
+      if (!name || !username || !email || !password) { 
+        showToast('Please complete all signup fields.', 'error');
+        return; 
+      } 
+      
+      if (state.users.some(u=>u.username===username || u.email.toLowerCase()===email)) { 
+        showToast('User with that username or email already exists.', 'error');
+        return; 
+      } 
+      
+      const id = Math.max(0,...state.users.map(u=>u.id)) + 1; 
+      const user = { id, username, password, name, email, role, emailVerified: false }; 
+      state.users.push(user); 
+      saveData();
+      
+      // Send verification email
+      sendVerificationEmail(email, name);
+      
+      showToast('Account created - Please check your email for verification link', 'success');
+      document.getElementById('signup-panel').style.display='none'; 
+      document.getElementById('login-form').style.display='block';
+    }
+
+    // Email verification system
+    function sendVerificationEmail(email, username) {
+      const templateParams = {
+        to_email: email,
+        username: username,
+        verification_link: `#verified`, // In real app, this would be a proper URL
+        company_name: 'ICT Ticketing System'
+      };
+
+      emailjs.send('your_service_id', 'your_verification_template_id', templateParams)
+        .then((response) => {
+          console.log('Verification email sent!', response.status, response.text);
+          showToast('Verification email sent successfully!', 'success');
+        }, (error) => {
+          console.log('Failed to send verification email...', error);
+          showToast('Verification email will be sent shortly.', 'info');
+        });
+    }
+
+    // Password reset system
+    function showPasswordResetModal() {
+      document.getElementById('reset-modal').style.display = 'flex';
+    }
+
+    function closeResetModal() {
+      document.getElementById('reset-modal').style.display = 'none';
+    }
+
+    function submitPasswordReset() {
+      const email = document.getElementById('reset-email').value.trim();
+      if (!email) {
+        showToast('Please enter your email address', 'error');
+        return;
+      }
+      
+      // Simulate password reset request
+      const user = state.users.find(u => u.email === email);
+      if (user) {
+        const templateParams = {
+          to_email: email,
+          username: user.name,
+          reset_link: `#reset-password`, // In real app, this would be a proper URL
+          company_name: 'ICT Ticketing System'
+        };
+
+        emailjs.send('your_service_id', 'your_reset_template_id', templateParams)
+          .then((response) => {
+            showToast('Password reset instructions sent to your email', 'success');
+            closeResetModal();
+          }, (error) => {
+            showToast('Password reset email will be sent shortly.', 'info');
+            closeResetModal();
+          });
+      } else {
+        showToast('If an account exists with this email, reset instructions will be sent.', 'info');
+        closeResetModal();
+      }
+    }
+
+    // Request Management System
+    function submitRequest(){ 
+      const device = document.getElementById('req-device-type').value; 
+      const quantity = parseInt(document.getElementById('req-quantity').value) || 1; 
+      const duration = document.getElementById('req-duration').value; 
+      const purpose = document.getElementById('req-purpose').value.trim(); 
+      const neededBy = document.getElementById('req-needed-by').value || null; 
+      
+      if (!device || !purpose) { 
+        showToast('Please select a device and provide purpose.', 'error');
+        return; 
+      } 
+      
+      const id = 'REQ-' + (Math.floor(Math.random()*9000)+1000); 
+      const newReq = { 
+        id, 
+        device, 
+        quantity, 
+        requesterId: state.currentUser.id, 
+        requesterName: state.currentUser.name, 
+        purpose, 
+        duration, 
+        status: 'pending', 
+        createdAt: Date.now(), 
+        neededBy: neededBy ? new Date(neededBy).getTime() : null, 
+        rejectReason: '' 
+      }; 
+      
+      state.requests.push(newReq); 
+      saveData();
+      
+      // Create notification for approvers
+      const approvers = state.users.filter(u => u.role === 'approver' || u.role === 'admin');
+      approvers.forEach(approver => {
+        state.notifications.push({
+          id: 'N-' + (Math.floor(Math.random()*90000)+1000),
+          userId: approver.id,
+          message: `New request ${id} from ${state.currentUser.name}`,
+          createdAt: Date.now(),
+          isRead: false
+        });
+      });
+      
+      showToast(`Request submitted: ${id}`, 'success');
+      clearRequestForm(); 
+      navigate('myrequests'); 
+    }
+
+    function clearRequestForm(){ 
+      document.getElementById('req-device-type').value = ''; 
+      document.getElementById('req-quantity').value = 1; 
+      document.getElementById('req-duration').value = '1 day'; 
+      document.getElementById('req-purpose').value = ''; 
+      document.getElementById('req-needed-by').value = ''; 
+    }
+
+    function renderMyRequests(){ 
+      const tbody = document.querySelector('#table-myrequests tbody'); 
+      const emptyState = document.getElementById('myrequests-empty');
+      tbody.innerHTML = ''; 
+      
+      const query = (document.getElementById('search-myrequests')||{value:''}).value.toLowerCase(); 
+      const mine = state.requests.filter(r => r.requesterId === state.currentUser.id)
+        .sort((a,b)=>b.createdAt - a.createdAt)
+        .filter(r=> JSON.stringify(r).toLowerCase().includes(query)); 
+      
+      if (mine.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      } else {
+        emptyState.style.display = 'none';
+      }
+      
+      mine.forEach(r => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td>${r.id}</td>
+          <td>${r.device}</td>
+          <td>${r.quantity}</td>
+          <td>${escapeHtml(r.purpose)}${r.rejectReason?'<div style="color:#9f1239;font-size:12px;margin-top:4px">Rejection: '+escapeHtml(r.rejectReason)+'</div>':''}</td>
+          <td>${r.neededBy?new Date(r.neededBy).toLocaleString():'-'}</td>
+          <td>${new Date(r.createdAt).toLocaleString()}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td class="action">${r.status==='pending' ? `<button class="btn btn-danger" onclick="cancelRequest('${r.id}')"><i class="fas fa-times"></i> Cancel</button>` : ''}</td>`; 
+        tbody.appendChild(tr); 
+      }); 
+    }
+
+    function cancelRequest(id){ 
+      if (!confirm('Are you sure you want to cancel this request?')) return; 
+      const idx = state.requests.findIndex(r=>r.id===id && r.requesterId===state.currentUser.id); 
+      if (idx>=0) { 
+        state.requests.splice(idx,1); 
+        saveData();
+        renderMyRequests(); 
+        renderDashboard(); 
+        showToast('Request cancelled successfully.', 'success');
+      } 
+    }
+
+    // Approvals System
+    function renderApprovals(){ 
+      const tbody = document.querySelector('#table-approvals tbody'); 
+      const emptyState = document.getElementById('approvals-empty');
+      tbody.innerHTML = ''; 
+      state.selectedApprovals.clear();
+      
+      const query = (document.getElementById('search-approvals')||{value:''}).value.toLowerCase(); 
+      const pending = state.requests.filter(r=>r.status === 'pending')
+        .sort((a,b)=>b.createdAt - a.createdAt)
+        .filter(r=> JSON.stringify(r).toLowerCase().includes(query)); 
+      
+      if (pending.length === 0) {
+        emptyState.style.display = 'block';
+        document.getElementById('select-all-approvals').checked = false;
+        return;
+      } else {
+        emptyState.style.display = 'none';
+      }
+      
+      pending.forEach(r => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td><input type="checkbox" class="approval-checkbox" value="${r.id}" onchange="toggleApprovalSelection('${r.id}', this.checked)"></td>
+          <td>${r.id}</td>
+          <td>${r.requesterName}</td>
+          <td>${r.device}</td>
+          <td>${r.quantity}</td>
+          <td>${escapeHtml(r.purpose)}</td>
+          <td>${r.neededBy?new Date(r.neededBy).toLocaleString():'-'}</td>
+          <td>${new Date(r.createdAt).toLocaleString()}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td class="action">
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-success" onclick="decideRequest('${r.id}','approved')"><i class="fas fa-check"></i> Approve</button>
+              <button class="btn btn-danger" onclick="openRejectModal('${r.id}')"><i class="fas fa-times"></i> Reject</button>
+            </div>
+          </td>`; 
+        tbody.appendChild(tr); 
+      }); 
+    }
+
+    function toggleApprovalSelection(id, checked) {
+      if (checked) {
+        state.selectedApprovals.add(id);
+      } else {
+        state.selectedApprovals.delete(id);
+        document.getElementById('select-all-approvals').checked = false;
+      }
+    }
+
+    function toggleSelectAllApprovals(checked) {
+      const checkboxes = document.querySelectorAll('.approval-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = checked;
+        toggleApprovalSelection(checkbox.value, checked);
+      });
+    }
+
+    function bulkApprove() {
+      if (state.selectedApprovals.size === 0) {
+        showToast('Please select at least one request to approve.', 'warning');
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to approve ${state.selectedApprovals.size} request(s)?`)) return;
+      
+      let approvedCount = 0;
+      state.selectedApprovals.forEach(id => {
+        const r = state.requests.find(x => x.id === id);
+        if (r) {
+          r.status = 'approved';
+          
+          // Create notification for requester
+          state.notifications.push({
+            id: 'N-' + (Math.floor(Math.random()*90000)+1000),
+            userId: r.requesterId,
+            message: `Your request ${r.id} was approved`,
+            createdAt: Date.now(),
+            isRead: false
+          });
+          
+          approvedCount++;
+        }
+      });
+      
+      saveData();
+      renderApprovals();
+      renderDashboard();
+      showToast(`Successfully approved ${approvedCount} request(s).`, 'success');
+      state.selectedApprovals.clear();
+    }
+
+    function openRejectModal(id){ 
+      state.pendingRejectId = id; 
+      document.getElementById('reject-reason').value = ''; 
+      document.getElementById('modal-reject').style.display = 'flex'; 
+    }
+    
+    function closeRejectModal(){ 
+      state.pendingRejectId = null; 
+      document.getElementById('modal-reject').style.display = 'none'; 
+    }
+    
+    function confirmReject(){ 
+      const reason = document.getElementById('reject-reason').value.trim(); 
+      if (!reason) { 
+        showToast('Please provide a rejection reason.', 'error');
+        return; 
+      } 
+      const r = state.requests.find(x=>x.id===state.pendingRejectId); 
+      if (!r) { 
+        showToast('Request not found.', 'error');
+        closeRejectModal(); 
+        return; 
+      } 
+      r.status = 'rejected'; 
+      r.rejectReason = reason; 
+      saveData();
+      
+      // Create notification for requester
+      state.notifications.push({
+        id: 'N-' + (Math.floor(Math.random()*90000)+1000),
+        userId: r.requesterId,
+        message: `Your request ${r.id} was rejected: ${reason}`,
+        createdAt: Date.now(),
+        isRead: false
+      });
+      
+      renderApprovals(); 
+      renderMyRequests(); 
+      renderDashboard(); 
+      showToast(`Request ${r.id} rejected.`, 'success');
+      closeRejectModal(); 
+    }
+
+    function decideRequest(id, decision){ 
+      const r = state.requests.find(x=>x.id===id); 
+      if (!r) { 
+        showToast('Request not found.', 'error');
+        return; 
+      } 
+      r.status = decision; 
+      saveData();
+      
+      // Create notification for requester
+      state.notifications.push({
+        id: 'N-' + (Math.floor(Math.random()*90000)+1000),
+        userId: r.requesterId,
+        message: `Your request ${r.id} was ${decision}`,
+        createdAt: Date.now(),
+        isRead: false
+      });
+      
+      renderApprovals(); 
+      renderMyRequests(); 
+      renderDashboard(); 
+      showToast(`Request ${id} ${decision}.`, 'success');
+    }
+
+    // Inventory Management
+    function renderInventoryTable(){ 
+      const tbody = document.querySelector('#table-inventory tbody'); 
+      const emptyState = document.getElementById('inventory-empty');
+      tbody.innerHTML = ''; 
+      
+      const q = (document.getElementById('search-inventory')||{value:''}).value.toLowerCase(); 
+      const filtered = state.inventory.filter(i=>JSON.stringify(i).toLowerCase().includes(q));
+      
+      if (filtered.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      } else {
+        emptyState.style.display = 'none';
+      }
+      
+      filtered.forEach(item => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td>${item.id}</td>
+          <td>${item.type}</td>
+          <td>${item.model}</td>
+          <td>${item.status}</td>
+          <td class="action">
+            <select onchange="changeDeviceStatus('${item.id}', this.value)" style="padding: 6px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1);">
+              <option ${item.status==='Available'?'selected':''}>Available</option>
+              <option ${item.status==='Issued'?'selected':''}>Issued</option>
+              <option ${item.status==='Maintenance'?'selected':''}>Maintenance</option>
+            </select>
+            <button class="btn" onclick="editDevice('${item.id}')"><i class="fas fa-edit"></i> Edit</button>
+            <button class="btn btn-danger" onclick="removeDevice('${item.id}')"><i class="fas fa-trash"></i> Delete</button>
+          </td>`; 
+        tbody.appendChild(tr); 
+      }); 
+      document.getElementById('total-devices-badge').textContent = `${state.inventory.length} devices`; 
+    }
+
+    function changeDeviceStatus(id, status){ 
+      const item = state.inventory.find(d=>d.id===id); 
+      if (!item) return; 
+      item.status = status; 
+      saveData();
+      renderInventoryTable(); 
+      renderDashboard(); 
+      showToast(`Device ${id} status updated to ${status}.`, 'success');
+    }
+
+    function openAddDeviceModal(){ 
+      document.getElementById('modal-add-device').style.display = 'flex'; 
+      document.getElementById('md-type').value = ''; 
+      document.getElementById('md-model').value = ''; 
+      document.getElementById('md-status').value = 'Available'; 
+    }
+    
+    function closeAddDeviceModal(){ 
+      document.getElementById('modal-add-device').style.display = 'none'; 
+    }
+    
+    function confirmAddDevice(){ 
+      const type = document.getElementById('md-type').value.trim(); 
+      const model = document.getElementById('md-model').value.trim(); 
+      const status = document.getElementById('md-status').value; 
+      
+      if (!type || !model) { 
+        showToast('Please fill type and model.', 'error');
+        return; 
+      } 
+      
+      const id = 'D-' + (Math.floor(Math.random()*9000)+1000); 
+      state.inventory.push({ id, type, model, status }); 
+      saveData();
+      renderInventoryTable(); 
+      closeAddDeviceModal(); 
+      showToast(`Device ${id} added successfully.`, 'success');
+    }
+
+    function removeDevice(id){ 
+      if (!confirm('Are you sure you want to delete device ' + id + '?')) return; 
+      state.inventory = state.inventory.filter(d=>d.id !== id); 
+      saveData();
+      renderInventoryTable(); 
+      renderDashboard(); 
+      showToast(`Device ${id} deleted successfully.`, 'success');
+    }
+
+    function editDevice(id){ 
+      const item = state.inventory.find(d=>d.id===id); 
+      if (!item) return; 
+      const newModel = prompt('Edit model', item.model); 
+      if (newModel !== null && newModel.trim() !== '') { 
+        item.model = newModel.trim(); 
+        saveData();
+        renderInventoryTable(); 
+        showToast(`Device ${id} updated successfully.`, 'success');
+      } 
+    }
+
+    // Stock Management
+    function processStockIn() {
+      const deviceType = document.getElementById('stockin-device-type').value;
+      const model = document.getElementById('stockin-model').value.trim();
+      const quantity = parseInt(document.getElementById('stockin-quantity').value) || 1;
+      const supplier = document.getElementById('stockin-supplier').value.trim();
+      const notes = document.getElementById('stockin-notes').value.trim();
+      
+      if (!deviceType || !model || !supplier) {
+        showToast('Please fill device type, model, and supplier.', 'error');
+        return;
+      }
+      
+      // Add devices to inventory
+      for (let i = 0; i < quantity; i++) {
+        const id = 'D-' + (Math.floor(Math.random()*9000)+1000);
+        state.inventory.push({ 
+          id, 
+          type: deviceType, 
+          model, 
+          status: 'Available' 
+        });
+      }
+      
+      // Record transaction
+      const transaction = {
+        id: 'STI-' + (Math.floor(Math.random()*9000)+1000),
+        type: 'Stock In',
+        deviceType,
+        model,
+        quantity,
+        supplier,
+        notes,
+        processedBy: state.currentUser.name,
+        timestamp: Date.now()
+      };
+      
+      state.stockTransactions.push(transaction);
+      saveData();
+      
+      showToast(`Successfully added ${quantity} ${deviceType}(s) to inventory.`, 'success');
+      clearStockInForm();
+      renderInventoryTable();
+      renderDashboard();
+    }
+    
+    function clearStockInForm() {
+      document.getElementById('stockin-device-type').value = '';
+      document.getElementById('stockin-model').value = '';
+      document.getElementById('stockin-quantity').value = 1;
+      document.getElementById('stockin-supplier').value = '';
+      document.getElementById('stockin-notes').value = '';
+    }
+
+    function processStockOut() {
+      const deviceType = document.getElementById('stockout-device-type').value;
+      const model = document.getElementById('stockout-model').value.trim();
+      const quantity = parseInt(document.getElementById('stockout-quantity').value) || 1;
+      const reason = document.getElementById('stockout-reason').value;
+      const notes = document.getElementById('stockout-notes').value.trim();
+      
+      if (!deviceType || !model) {
+        showToast('Please fill device type and model.', 'error');
+        return;
+      }
+      
+      // Check if we have enough devices
+      const availableDevices = state.inventory.filter(
+        d => d.type === deviceType && 
+        d.model === model && 
+        d.status === 'Available'
+      );
+      
+      if (availableDevices.length < quantity) {
+        showToast(`Only ${availableDevices.length} ${deviceType}(s) of model ${model} are available.`, 'error');
+        return;
+      }
+      
+      // Remove devices from inventory
+      for (let i = 0; i < quantity; i++) {
+        const index = state.inventory.findIndex(
+          d => d.type === deviceType && 
+          d.model === model && 
+          d.status === 'Available'
+        );
+        
+        if (index !== -1) {
+          state.inventory.splice(index, 1);
+        }
+      }
+      
+      // Record transaction
+      const transaction = {
+        id: 'STO-' + (Math.floor(Math.random()*9000)+1000),
+        type: 'Stock Out',
+        deviceType,
+        model,
+        quantity,
+        reason,
+        notes,
+        processedBy: state.currentUser.name,
+        timestamp: Date.now()
+      };
+      
+      state.stockTransactions.push(transaction);
+      saveData();
+      
+      showToast(`Successfully removed ${quantity} ${deviceType}(s) from inventory.`, 'success');
+      clearStockOutForm();
+      renderInventoryTable();
+      renderDashboard();
+    }
+    
+    function clearStockOutForm() {
+      document.getElementById('stockout-device-type').value = '';
+      document.getElementById('stockout-model').value = '';
+      document.getElementById('stockout-quantity').value = 1;
+      document.getElementById('stockout-reason').value = 'Issued';
+      document.getElementById('stockout-notes').value = '';
+    }
+
+    // Dashboard System
+    function refreshDashboard() {
+      renderDashboard();
+      showToast('Dashboard refreshed.', 'success');
+    }
+
+    function renderDashboard(){ 
+      const totalRequests = state.requests.length; 
+      const pending = state.requests.filter(r=>r.status==='pending').length; 
+      const approved = state.requests.filter(r=>r.status==='approved').length; 
+      const issued = state.requests.filter(r=>r.status==='issued').length; 
+      const available = state.inventory.filter(i=>i.status==='Available').length; 
+      
+      document.getElementById('total-requests-badge').textContent = `${totalRequests} requests`; 
+      document.getElementById('stat-pending').textContent = pending; 
+      document.getElementById('stat-approved').textContent = approved; 
+      document.getElementById('stat-issued').textContent = issued; 
+      document.getElementById('stat-available').textContent = available; 
+      
+      // Update recent activity
+      const recentActivity = document.getElementById('recent-activity');
+      recentActivity.innerHTML = '';
+      
+      // Combine requests and stock transactions for activity feed
+      const activities = [
+        ...state.requests.slice(-5).map(r => ({
+          type: 'request',
+          id: r.id,
+          text: `Request ${r.id} submitted by ${r.requesterName}`,
+          time: r.createdAt,
+          status: r.status
+        })),
+        ...state.stockTransactions.slice(-5).map(t => ({
+          type: 'stock',
+          id: t.id,
+          text: `${t.type}: ${t.quantity} ${t.deviceType}(s)`,
+          time: t.timestamp,
+          status: 'processed'
+        }))
+      ];
+      
+      // Sort by time and take the 5 most recent
+      activities.sort((a, b) => b.time - a.time).slice(0, 5).forEach(activity => {
+        const div = document.createElement('div');
+        div.style.padding = '8px 0';
+        div.style.borderBottom = '1px solid rgba(0,0,0,0.04)';
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        
+        let icon = 'fas fa-question';
+        if (activity.type === 'request') icon = 'fas fa-ticket-alt';
+        if (activity.type === 'stock') icon = 'fas fa-boxes';
+        
+        div.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="${icon}" style="color: var(--accent-1);"></i>
+            <span>${activity.text}</span>
+          </div>
+          <span class="muted" style="font-size: 12px;">${new Date(activity.time).toLocaleDateString()}</span>
+        `;
+        
+        recentActivity.appendChild(div);
+      });
+      
+      if (activities.length === 0) {
+        recentActivity.innerHTML = '<div class="muted" style="text-align: center; padding: 20px;">No recent activity</div>';
+      }
+      
+      // Charts
+      const ctxStatus = document.getElementById('chart-status').getContext('2d'); 
+      const statusData = [ 
+        pending, 
+        approved, 
+        issued, 
+        state.requests.filter(r=>r.status==='rejected').length 
+      ]; 
+      
+      if (state.charts.status) state.charts.status.destroy(); 
+      state.charts.status = new Chart(ctxStatus, { 
+        type: 'pie', 
+        data: { 
+          labels:['Pending','Approved','Issued','Rejected'],
+          datasets:[{ 
+            data: statusData, 
+            backgroundColor: ['#f6c23e','#00b894','#4e73df','#ff6b6b'] 
+          }] 
+        }, 
+        options:{
+          plugins:{
+            legend:{
+              position:'bottom'
+            }
+          } 
+        } 
+      }); 
+      
+      const ctxTime = document.getElementById('chart-time').getContext('2d'); 
+      const last7 = [...Array(7)].map((_,i)=> { 
+        const day = new Date(); 
+        day.setDate(day.getDate() - (6 - i)); 
+        return day; 
+      }); 
+      const labels = last7.map(d=>d.toLocaleDateString()); 
+      const counts = last7.map(day => state.requests.filter(r => { 
+        const d = new Date(r.createdAt); 
+        return d.toDateString() === day.toDateString(); 
+      }).length); 
+      
+      if (state.charts.time) state.charts.time.destroy(); 
+      state.charts.time = new Chart(ctxTime, { 
+        type:'line', 
+        data:{ 
+          labels, 
+          datasets:[{ 
+            label:'Requests', 
+            data:counts, 
+            borderColor:'#36b9cc', 
+            backgroundColor:'rgba(54,185,204,0.08)', 
+            fill:true, 
+            tension:0.3 
+          }]
+        }, 
+        options:{
+          plugins:{
+            legend:{
+              display:false
+            }
+          }
+        } 
+      }); 
+    }
+
+    // Notifications System
+    function updateNotifCount(){ 
+      const countEl = document.getElementById('notif-count'); 
+      if (!state.currentUser) { 
+        countEl.style.display = 'none'; 
+        return; 
+      } 
+      const unread = state.notifications.filter(n => n.userId === state.currentUser.id && !n.isRead).length; 
+      if (unread>0) { 
+        countEl.style.display = ''; 
+        countEl.textContent = unread; 
+      } else countEl.style.display = 'none'; 
+    }
+
+    function toggleNotifDropdown(){ 
+      const dd = document.getElementById('notif-dropdown'); 
+      if (dd.style.display === 'block') { 
+        dd.style.display = 'none'; 
+        return; 
+      } 
+      dd.innerHTML = ''; 
+      
+      if (!state.currentUser) { 
+        dd.innerHTML = '<div class="muted">Not signed in</div>'; 
+        dd.style.display='block'; 
+        return; 
+      } 
+      
+      const myNotes = state.notifications
+        .filter(n => n.userId === state.currentUser.id)
+        .sort((a,b)=>b.createdAt - a.createdAt)
+        .slice(0, 10);
+      
+      if (myNotes.length===0) {
+        dd.innerHTML = '<div class="muted" style="padding: 12px;">No notifications</div>'; 
+      } else { 
+        myNotes.forEach(n=>{ 
+          const div = document.createElement('div'); 
+          div.style.padding='10px 12px'; 
+          div.style.borderBottom='1px solid rgba(0,0,0,0.04)'; 
+          div.style.cursor = 'pointer';
+          div.onclick = function() {
+            // Mark as read
+            n.isRead = true;
+            saveData();
+            updateNotifCount();
+            toggleNotifDropdown();
+          };
+          div.innerHTML = `<div style="font-size:13px">${escapeHtml(n.message)}</div><div style="font-size:11px;color:var(--muted)">${new Date(n.createdAt).toLocaleString()}</div>`; 
+          dd.appendChild(div); 
+        }); 
+        
+        // Add clear all button
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'btn';
+        clearBtn.style.width = '100%';
+        clearBtn.style.marginTop = '8px';
+        clearBtn.innerHTML = '<i class="fas fa-trash"></i> Clear All';
+        clearBtn.onclick = function(e) {
+          e.stopPropagation();
+          state.notifications = state.notifications.filter(n => n.userId !== state.currentUser.id);
+          saveData();
+          updateNotifCount();
+          toggleNotifDropdown();
+        };
+        dd.appendChild(clearBtn);
+      } 
+      dd.style.display = 'block'; 
+    }
+
+    // Export Functions
+    function exportMyRequests() {
+      const mine = state.requests.filter(r => r.requesterId === state.currentUser.id)
+        .sort((a,b)=>b.createdAt - a.createdAt);
+      
+      const rows = [
+        ['Request ID', 'Device', 'Quantity', 'Purpose', 'Duration', 'Status', 'Submitted Date', 'Needed By'],
+        ...mine.map(r => [
+          r.id, 
+          r.device, 
+          r.quantity, 
+          r.purpose, 
+          r.duration, 
+          r.status, 
+          new Date(r.createdAt).toLocaleString(),
+          r.neededBy ? new Date(r.neededBy).toLocaleString() : '-'
+        ])
+      ];
+      
+      downloadCSV(rows, 'my_requests.csv');
+      showToast('Your requests exported successfully.', 'success');
+    }
+
+    function exportInventoryCSV(){ 
+      const rows = [['Device ID','Type','Model','Status'], ...state.inventory.map(i=>[i.id,i.type,i.model,i.status])]; 
+      downloadCSV(rows, 'inventory.csv'); 
+      showToast('Inventory exported successfully.', 'success');
+    }
+    
+    function exportRequestsReport() {
+      const rows = [
+        ['Request ID', 'Device', 'Quantity', 'Requester', 'Purpose', 'Status', 'Submitted Date', 'Needed By'],
+        ...state.requests.map(r => [
+          r.id, 
+          r.device, 
+          r.quantity, 
+          r.requesterName, 
+          r.purpose, 
+          r.status, 
+          new Date(r.createdAt).toLocaleString(),
+          r.neededBy ? new Date(r.neededBy).toLocaleString() : '-'
+        ])
+      ];
+      
+      downloadCSV(rows, 'requests_report.csv');
+      showToast('Requests report exported successfully.', 'success');
+    }
+    
+    function exportFullReport(){ 
+      const summary = [
+        ['ICT Ticketing System - Full Report'],
+        ['Generated on', new Date().toLocaleString()],
+        ['Generated by', state.currentUser.name],
+        [],
+        ['Summary'],
+        ['Total requests', state.requests.length],
+        ['Pending', state.requests.filter(r=>r.status==='pending').length],
+        ['Approved', state.requests.filter(r=>r.status==='approved').length],
+        ['Issued', state.requests.filter(r=>r.status==='issued').length],
+        ['Rejected', state.requests.filter(r=>r.status==='rejected').length],
+        ['Total devices in inventory', state.inventory.length],
+        ['Available devices', state.inventory.filter(i=>i.status==='Available').length],
+        [],
+        ['Inventory'],
+        ['Device ID','Type','Model','Status'], 
+        ...state.inventory.map(i=>[i.id,i.type,i.model,i.status]),
+        [],
+        ['Requests'],
+        ['Request ID','Device','Qty','Requester','Status','Submitted','Purpose'],
+        ...state.requests.map(r => [r.id, r.device, r.quantity, r.requesterName, r.status, new Date(r.createdAt).toLocaleString(), r.purpose])
+      ]; 
+      
+      downloadCSV(summary, 'full_report.csv'); 
+      showToast('Full report exported successfully.', 'success');
+    }
+    
+    function downloadCSV(rows, filename){ 
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n'); 
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); 
+      const url = URL.createObjectURL(blob); 
+      const a = document.createElement('a'); 
+      a.href = url; 
+      a.download = filename; 
+      a.click(); 
+      URL.revokeObjectURL(url); 
+    }
+
+    function downloadDashboardPDF(){ 
+      showToast('PDF export would be implemented with a server-side solution in a real application.', 'info');
+    }
+
+    // Feedback System
+    function submitFeedback(){ 
+      const subj = document.getElementById('fb-subject').value.trim(); 
+      const msg = document.getElementById('fb-message').value.trim(); 
+      if (!subj || !msg) { 
+        showToast('Please fill subject and message.', 'error');
+        return; 
+      } 
+      
+      state.feedback.push({ 
+        id:'FB-'+(Math.floor(Math.random()*90000)+1000), 
+        user: state.currentUser.name, 
+        subject: subj, 
+        message: msg, 
+        createdAt: Date.now() 
+      }); 
+      
+      saveData();
+      showToast('Thanks — feedback submitted.', 'success');
+      clearFeedbackForm();
+    }
+    
+    function clearFeedbackForm() {
+      document.getElementById('fb-subject').value = '';
+      document.getElementById('fb-message').value = '';
+    }
+
+    // Utility Functions
+    function printInventory() {
+      window.print();
+    }
+
+    function escapeHtml(s){ 
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); 
+    }
+
+    function statusBadge(s){ 
+      const map = { 
+        pending: `<span style="background:#fff4e5;padding:6px 10px;border-radius:999px;color:#d97706;font-weight:700"><i class="fas fa-clock"></i> ${s}</span>`, 
+        approved: `<span style="background:#e6fffa;padding:6px 10px;border-radius:999px;color:#059669;font-weight:700"><i class="fas fa-check"></i> ${s}</span>`, 
+        issued: `<span style="background:#e8f1ff;padding:6px 10px;border-radius:999px;color:#1e40af;font-weight:700"><i class="fas fa-box"></i> ${s}</span>`, 
+        rejected: `<span style="background:#fff1f2;padding:6px 10px;border-radius:999px;color:#9f1239;font-weight:700"><i class="fas fa-times"></i> ${s}</span>` 
+      }; 
+      return map[s] || `<span class="badge">${s}</span>`; 
+    }
+
+    // Global search
+    function globalSearch(q){ 
+      q = q.toLowerCase(); 
+      if (!q) return; 
+      
+      // try to find best page
+      if (['laptop','phone','projector','device','inventory'].some(x=>q.includes(x))) { 
+        navigate('inventory'); 
+        document.getElementById('search-inventory').value = q; 
+        renderInventoryTable(); 
+        return; 
+      }
+      if (['pending','approve','approved','reject','request'].some(x=>q.includes(x))) { 
+        navigate('approvals'); 
+        document.getElementById('search-approvals').value = q; 
+        renderApprovals(); 
+        return; 
+      }
+      navigate('myrequests'); 
+      document.getElementById('search-myrequests').value = q; 
+      renderMyRequests(); 
+    }
+
+    // Application Initialization
+    function initApp() {
+      initializeData();
+      
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) { 
+        state.currentUser = JSON.parse(storedUser); 
+        userSignedIn(); 
+      }
+
+      // Add Enter key support for login
+      document.getElementById('login-username').addEventListener('keydown', e=>{ if (e.key === 'Enter') handleLogin(); });
+      document.getElementById('login-password').addEventListener('keydown', e=>{ if (e.key === 'Enter') handleLogin(); });
+    }
+
+    // Start the application
+    initApp();
+
+    // Expose functions to global scope for HTML onclick handlers
+    window.navigate = navigate;
+    window.submitRequest = submitRequest;
+    window.clearRequestForm = clearRequestForm;
+    window.renderMyRequests = renderMyRequests;
+    window.refreshDashboard = renderDashboard;
+    window.showPasswordResetModal = showPasswordResetModal;
+    window.closeResetModal = closeResetModal;
+    window.submitPasswordReset = submitPasswordReset;
+    window.openAddDeviceModal = openAddDeviceModal;
+    window.closeAddDeviceModal = closeAddDeviceModal;
+    window.confirmAddDevice = confirmAddDevice;
+    window.exportInventoryCSV = exportInventoryCSV;
+    window.exportFullReport = exportFullReport;
+    window.removeDevice = removeDevice;
+    window.decideRequest = decideRequest;
+    window.editDevice = editDevice;
+    window.cancelRequest = cancelRequest;
+    window.doLogout = doLogout;
+    window.processStockIn = processStockIn;
+    window.processStockOut = processStockOut;
+    window.clearStockInForm = clearStockInForm;
+    window.clearStockOutForm = clearStockOutForm;
+    window.openRejectModal = openRejectModal;
+    window.closeRejectModal = closeRejectModal;
+    window.confirmReject = confirmReject;
+    window.toggleSelectAllApprovals = toggleSelectAllApprovals;
+    window.toggleApprovalSelection = toggleApprovalSelection;
+    window.bulkApprove = bulkApprove;
+    window.exportMyRequests = exportMyRequests;
+    window.exportRequestsReport = exportRequestsReport;
+    window.downloadDashboardPDF = downloadDashboardPDF;
+    window.printInventory = printInventory;
+    window.submitFeedback = submitFeedback;
+    window.clearFeedbackForm = clearFeedbackForm;
+    window.showToast = showToast;
+
+  </script>
+</body>
+</html>
